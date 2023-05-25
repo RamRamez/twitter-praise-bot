@@ -1,13 +1,13 @@
 import path from 'path';
+import { existsSync, writeFileSync } from 'fs';
 import { config } from 'dotenv';
-import { handleLog } from './lib/helpers';
-import {existsSync, writeFileSync} from "fs";
+import { createLog } from './lib/helpers';
+import App from './app';
 
 global.logFile = path.join(__dirname, '/../log.txt');
+global.logJson = path.join(__dirname, '/../log.json');
 
 config();
-
-const { BEARER_TOKEN } = process.env;
 
 main().catch(console.log);
 
@@ -17,8 +17,8 @@ async function main() {
 		if (!logExists) {
 			writeFileSync(global.logFile, '');
 		}
-		console.log(BEARER_TOKEN);
+		App();
 	} catch (error) {
-		handleLog(error, 'main');
+		createLog(error, 'main');
 	}
 }

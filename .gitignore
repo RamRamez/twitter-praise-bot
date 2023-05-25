@@ -19,6 +19,7 @@
 .env.production.local
 .env
 /log.txt
+/log.json
 
 /archive
 
