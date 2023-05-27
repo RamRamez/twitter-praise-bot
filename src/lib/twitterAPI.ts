@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import axios from 'axios';
 import { config } from 'dotenv';
 import { createLog } from './helpers';
+import { IBasicTweet, ITweetResponse } from '../types/tweet';
 // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-commonjs
 const OAuth = require('oauth-1.0a');
 
@@ -16,14 +17,13 @@ const {
 	TOKEN_SECRET,
 } = process.env;
 
-interface IPostTweetResponse {
-	edit_history_tweet_ids: string[];
-	id: string;
+interface IPostTweet {
 	text: string;
+	inReplyToID: string;
 }
 
-export const postTweet = async (props: { text: string }): Promise<IPostTweetResponse> => {
-	const { text } = props;
+export const postTweet = async (props: IPostTweet): Promise<IBasicTweet> => {
+	const { text, inReplyToID } = props;
 	const url = `https://api.twitter.com/2/tweets`;
 	const oauth = OAuth({
 		consumer: {
@@ -51,7 +51,12 @@ export const postTweet = async (props: { text: string }): Promise<IPostTweetResp
 	try {
 		const { data } = await axios.post(
 			url,
-			{ text },
+			{
+				text,
+				reply: {
+					in_reply_to_tweet_id: inReplyToID,
+				},
+			},
 			{
 				headers: {
 					Authorization: authHeader.Authorization,
@@ -65,10 +70,17 @@ export const postTweet = async (props: { text: string }): Promise<IPostTweetResp
 	}
 };
 
-export const getBotMentions = async () => {
+export const getBotMentions = async (): Promise<ITweetResponse> => {
 	try {
-		const url = `https://api.twitter.com/2/users/${TWITTER_ID}/mentions`;
-		const { data } = await axios.get(url, {
+		const url = `https://api.twitter.com/2/users/${TWITTER_ID}/mentions?`;
+		const params = new URLSearchParams({
+			max_results: '100',
+			'user.fields': 'username',
+			'tweet.fields': 'author_id',
+			expansions: 'entities.mentions.username,author_id',
+		});
+		const urlWithParams = `${url}${params}`;
+		const { data } = await axios.get(urlWithParams, {
 			headers: {
 				Authorization: `Bearer ${BEARER_TOKEN}`,
 			},

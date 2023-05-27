@@ -1,11 +1,17 @@
-import { createLog } from './lib/helpers';
-import { getBotMentions, postTweet } from './lib/twitterAPI';
+import { addAuthorToTweets, createLog, extractPraiseParams } from './lib/helpers';
+import { getBotMentions } from './lib/twitterAPI';
 
 export default async function App() {
 	try {
-		const res = await postTweet({ text: 'Hello World! node 5' });
-		const res2 = await getBotMentions();
-		console.log(res, res2);
+		const mentionsResponse = await getBotMentions();
+		const tweetsWithAuthors = addAuthorToTweets(mentionsResponse);
+		const params = extractPraiseParams(tweetsWithAuthors[0]);
+		// const res = await postTweet({
+		// 	text: 'reply tweet 2',
+		// 	inReplyToID: '1661704305059962880',
+		// });
+		// writeFileSync(global.logJson, JSON.stringify(params));
+		console.log('params', params);
 	} catch (error) {
 		createLog(error, 'App');
 	}
