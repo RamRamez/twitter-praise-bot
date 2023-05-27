@@ -12,7 +12,7 @@ export const createLog = (str: any, errorTag?: string) => {
 		return;
 	}
 	// writeFileSync(global.logJson, JSON.stringify(str.response));
-	errorTag && console.log({ error: str.response.data.errors, errorCode: errorTag });
+	errorTag && console.log({ error: str, response: str.response, errorCode: errorTag });
 	const oldData = readFileSync(global.logFile);
 	const fd = openSync(global.logFile, 'w+');
 	const log = `Date: ${new Date().toLocaleString()}\nLog: ${str} ${
@@ -40,4 +40,10 @@ export const extractPraiseParams = (tweet: ITweetWithAuthor): IPraise => {
 	const lastMention = tweet.entities?.mentions.sort((a, b) => b.end - a.end)[0];
 	const reason = tweet.text.substring(lastMention.end).trim();
 	return { reason, receivers, giver };
+};
+
+export const preparePraiseTweet = (params: IPraise): string => {
+	const { receivers, giver, reason } = params;
+	const receiversString = receivers.join(' and @');
+	return `@${giver} has praised @${receiversString} ${reason}`;
 };

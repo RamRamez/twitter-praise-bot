@@ -22,7 +22,7 @@ interface IPostTweet {
 	inReplyToID: string;
 }
 
-export const postTweet = async (props: IPostTweet): Promise<IBasicTweet> => {
+export const postPraiseTweet = async (props: IPostTweet): Promise<IBasicTweet> => {
 	const { text, inReplyToID } = props;
 	const url = `https://api.twitter.com/2/tweets`;
 	const oauth = OAuth({
@@ -66,7 +66,7 @@ export const postTweet = async (props: IPostTweet): Promise<IBasicTweet> => {
 		);
 		return data;
 	} catch (error) {
-		createLog(error, 'getRequest');
+		createLog(error, 'postPraiseTweet');
 	}
 };
 
