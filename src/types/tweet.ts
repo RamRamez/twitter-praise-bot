@@ -104,15 +104,15 @@ export interface ITweetWithAuthor extends ITweet {
 }
 
 export interface ITweetResponse {
-	data: ITweet[];
+	data?: ITweet[];
 	includes?: {
 		users: IUserSimple[];
 		tweets: ITweet[];
 		media: IMedia[];
 	};
 	meta: {
-		newest_id: string;
-		oldest_id: string;
+		newest_id?: string;
+		oldest_id?: string;
 		result_count: number;
 		next_token?: string;
 		previous_token?: string;

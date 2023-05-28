@@ -3,6 +3,7 @@ import axios from 'axios';
 import { config } from 'dotenv';
 import { createLog } from './helpers';
 import { IBasicTweet, ITweetResponse } from '../types/tweet';
+import ErrorTag from './ErrorTag';
 // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-commonjs
 const OAuth = require('oauth-1.0a');
 
@@ -64,22 +65,28 @@ export const postPraiseTweet = async (props: IPostTweet): Promise<IBasicTweet> =
 				},
 			},
 		);
-		return data;
+		return data.data;
 	} catch (error) {
 		createLog(error, 'postPraiseTweet');
+		throw new ErrorTag(error);
 	}
 };
 
-export const getBotMentions = async (): Promise<ITweetResponse> => {
+export const getBotMentions = async (lastMentionId?: string): Promise<ITweetResponse> => {
 	try {
 		const url = `https://api.twitter.com/2/users/${TWITTER_ID}/mentions?`;
-		const params = new URLSearchParams({
+		const params = {
 			max_results: '100',
 			'user.fields': 'username',
 			'tweet.fields': 'author_id',
 			expansions: 'entities.mentions.username,author_id',
-		});
-		const urlWithParams = `${url}${params}`;
+			since_id: lastMentionId,
+		};
+		if (!lastMentionId) {
+			delete params.since_id;
+		}
+		const searchParams = new URLSearchParams(params);
+		const urlWithParams = `${url}${searchParams}`;
 		const { data } = await axios.get(urlWithParams, {
 			headers: {
 				Authorization: `Bearer ${BEARER_TOKEN}`,
@@ -88,5 +95,6 @@ export const getBotMentions = async (): Promise<ITweetResponse> => {
 		return data;
 	} catch (error) {
 		createLog(error, 'getBotMentions');
+		throw new ErrorTag(error);
 	}
 };

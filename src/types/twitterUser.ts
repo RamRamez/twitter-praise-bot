@@ -55,7 +55,6 @@ export interface IUserSimple {
 	id: string;
 	name?: string;
 	username?: string;
-	profile_image_url?: string;
 }
 
 export interface IRawUser {
