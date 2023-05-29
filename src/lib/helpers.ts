@@ -18,8 +18,8 @@ export const createLog = (str: any, tag?: string) => {
 	const oldData = readFileSync(global.logFile);
 	const fd = openSync(global.logFile, 'w+');
 	const log = `Date: ${new Date().toLocaleString()}\nLog: ${str} ${
-		tag ? `\nTag: ${tag}` : ''
-	}\n\n`;
+		str.response?.statusText ? `\nResponse: ${str.response.statusText}` : ''
+	} ${tag ? `\nTag: ${tag}` : ''}\n\n`;
 	const buffer = Buffer.from(log);
 	writeSync(fd, buffer, 0, buffer.length, 0); //write new data
 	writeSync(fd, oldData, 0, oldData.length, buffer.length); //append old data
@@ -52,13 +52,14 @@ export const preparePraiseTweet = (params: IPraise): string => {
 
 export const getAndSaveMentions = async (): Promise<ITweetWithAuthor[] | undefined> => {
 	try {
-		const mentions = await Mentions.find().sort({ created_at: -1 });
+		const mentions = await Mentions.find().sort({ id: -1 });
 		const lastMentionId = mentions[0]?.id;
 		const mentionsResponse = await getBotMentions(lastMentionId);
+		const mentionsIds = mentionsResponse.data?.map(mention => mention.id);
 		if (mentionsResponse.meta.result_count === 0) {
+			createLog('Mentions are up to date', 'no new mentions');
 			return undefined;
 		}
-		const mentionsIds = mentionsResponse.data.map(mention => mention.id);
 		createLog(`Fetched mentions: ${mentionsIds.join()}`, 'new mentions fetched');
 		const tweetsWithAuthors = addAuthorToTweets(mentionsResponse);
 		await Mentions.insertMany(tweetsWithAuthors, { ordered: false });
